@@ -1,0 +1,61 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "0.0.0.1",
+    "parameters": {},
+    "resources": [
+        {
+            "type": "Microsoft.Cache/redisEnterprise",
+            "apiVersion": "2021-02-01-preview",
+            "name": "${re_name}",
+            "location": "${location}",
+            "dependsOn": [],
+            "tags": {
+                "name": "abhishek",
+                "env": "dev"
+            },
+            "sku": {
+                "name": "Enterprise_E10",
+                "capacity": 2
+            },
+            "zones": [
+                "1",
+                "2"
+            ],
+            "properties": {},
+            "resources": [
+                {
+                    "type": "Microsoft.Cache/redisEnterprise/databases",
+                    "apiVersion": "2021-02-01-preview",
+                    "name": "${re_name}/default",
+                    "dependsOn": [
+                        "Microsoft.Cache/redisEnterprise/${re_name}"
+                    ],
+                    "tags": {},
+                    "properties": {
+                        "clientProtocol": "Plaintext",
+                        "evictionPolicy": "NoEviction",
+                        "clusteringPolicy": "OSSCluster",
+
+                        "modules": [
+                            {
+                                "name": "RediSearch"
+                            }
+                        ],
+                        "persistence": {
+                            "aofEnabled": false,
+                            "rdbEnabled": false
+                        },
+                        "geoReplication": {
+                            "groupNickname": "abhi-test-repl",
+                            "linkedDatabases": [
+                                {
+                                    "id": "/subscriptions/${subscription_id}/resourceGroups/${resource_grp_name}/providers/Microsoft.Cache/redisEnterprise/${re_name}/databases/default"
+                                }
+                            ]
+                        }
+                    }
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,85 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "0.0.0.1",
+    "parameters": {},
+    "resources": [
+        {
+            "type": "Microsoft.Cache/redisEnterprise",
+            "apiVersion": "2021-02-01-preview",
+            "name": "${re_name_2}",
+            "location": "${location}",
+            "dependsOn": [],
+            "tags": {
+                "name": "abhishek",
+                "env": "dev",
+                "tier": "secondary"
+            },
+            "sku": {
+                "name": "Enterprise_E10",
+                "capacity": 2
+            },
+            "zones": [
+                "1",
+                "2"
+            ],
+            "properties": {}
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2017-05-10",
+            "name": "${re1_deployment_name}",
+            "dependsOn": [
+                "${re_name_2}"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "parameters": {},
+                "template": {
+                    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {},
+                    "variables": {},
+                    "resources": [
+                        {
+                            "name": "${re_name_1}/default",
+                            "type": "Microsoft.Cache/redisEnterprise/databases",
+                            "apiVersion": "2021-02-01-preview",
+                            "properties": {
+                                "clientProtocol": "Plaintext",
+                                "evictionPolicy": "NoEviction",
+                                "clusteringPolicy": "OSSCluster",
+                               
+                                "modules": [
+                                    {
+                                        "name": "RediSearch"
+                                    }
+                                ],
+                                "persistence": {
+                                    "aofEnabled": false,
+                                    "rdbEnabled": false
+                                },
+                                "geoReplication": {
+                                    "groupNickname": "abhi-test-repl",
+                                    "linkedDatabases": [
+                                        {
+                                            "id": "/subscriptions/${subscription_id}/resourcegroups/${resource_grp_name}/providers/microsoft.cache/redisenterprise/${re_name_1}/databases/default"
+                                        },
+                                        {
+                                            "id": "/subscriptions/${subscription_id}/resourceGroups/${resource_grp_name}/providers/Microsoft.Cache/redisEnterprise/${re_name_2}/databases/default"
+                                        }
+                                    ]
+                                }
+                            },
+                            "dependsOn": [],
+                            "tags": {}
+                        }
+                    ],
+                    "outputs": {}
+                }
+            },
+            "resources": [],
+            "subscriptionId": "${subscription_id}",
+            "resourceGroup": "${resource_grp_name}"
+        }
+    ]
+}
